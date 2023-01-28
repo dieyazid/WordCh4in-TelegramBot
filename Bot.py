@@ -53,7 +53,7 @@ def Pre_Game():
         client.send_message(chat_id=message.chat.id, text="Ok, I start first")
         Surrender_Keyboard(client,message.chat.id)
         client.send_message(chat_id=message.chat.id, text="The first word is")
-        client.send_message(chat_id=message.chat.id, text=f"{user.ai_first_turn()}")
+        client.send_message(chat_id=message.chat.id, text=f"{user.Ai_Turn(True)}")
         client.send_message(chat_id=message.chat.id, text="Your turn")
         Start_Game()
 
@@ -64,16 +64,11 @@ def Start_Game(First_Player=any):
         user_id=message.chat.id
         user = Game.handle_user(user_id)
         if First_Player=='HUMAN':
-            valid=user.player_first_turn(message.text)
+            user.Player_Turn(True,message.text.lower())
         else:
-            valid=user.player_turn(message.text)
-        if valid==False:
-            gif_file=random.choice(gifs)
-            client.send_message(chat_id=message.chat.id, text="You lost")
-            client.send_animation(message.chat.id, gif_file)
-            Play_Again_Keyboard(client,message.chat.id)
-        else:
-            client.send_message(chat_id=message.chat.id, text=f"{user.ai_turn(message.text)}")
+            Send_Error(client,message.chat.id,user.Player_Turn(False,message.text.lower()))
+
+        client.send_message(chat_id=message.chat.id, text=f"{user.Ai_Turn(False,message.text.lower())}")
 
     @app.on_message(filters.regex('Surrender 🏳️'))
     def handle_word(client, message):
@@ -84,7 +79,23 @@ def Start_Game(First_Player=any):
     def handle_word(client, message):
         client.send_message(chat_id=message.chat.id, text="Wow wait that's not allowed 😶")
 
-
+### Game Result
+def Send_Error(client,chatid,result):
+    if result=='Letter Fail':
+        client.send_message(chatid, text='Wrong word!')
+        client.send_message(chatid, text='You can only use words that start with the last letter of the previous word.')
+    elif result=='Duplicated':
+        client.send_message(chatid, text='Wrong word!')
+        client.send_message(chatid, text='You can\'t use the same word twice.')
+    elif result=='Unvalid':
+        client.send_message(chatid, text='You used an unvalid or misspelled word!')
+        client.send_message(chatid, text="It's okay keep playing...")
+    else: return
+    gif_file=random.choice(gifs)
+    client.send_animation(chatid, gif_file)
+    Play_Again_Keyboard(client,chatid)
+    Main_Keyboard(client,chatid)
+    Main()
 
 ### Keybaords
 def Main_Keyboard(client,chatid):
