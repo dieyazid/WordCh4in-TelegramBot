@@ -11,7 +11,6 @@ class Game:
 
     
     def word_checker(self, word,first=False):
-        print(self.current_word)
         input_word = word.lower()
         if not first:
             last_letter = self.current_word[-1]
@@ -23,46 +22,42 @@ class Game:
                 return False
         #check if word is in dictanory 
         if input_word in self.words: 
-            self.duplicated.append(input_word)
             return True
         else: return False
 
     def ai_first_turn(self):
         selected_word= random.choice(self.words)
-        self.current_word= selected_word
-        self.words.remove(selected_word)
-        self.word_checker(selected_word)
+        self.validate(selected_word)
         return selected_word
 
     def player_first_turn(self,word):
-        return self.valid(self.word_checker(word,first=True),word)
+        return self.validate(word,self.word_checker(word,first=True))
 
 
     def ai_turn(self,user_input):
         # Get the last letter of the input
         last_letter = user_input[-1]
-
         # Find words that start with the last letter
         matching_words = [word for word in self.words if word[0] == last_letter]
-
         # If there are no matching words, give an error message
         if len(matching_words) == 0:
             return "I don't know any word that start with that letter. You won 😖"
         else:
             # Randomly choose a word from the matching words
             chosen_word = random.choice(matching_words)
-            self.duplicated.append(chosen_word)
+            self.validate(chosen_word)
             return chosen_word
         
-    def player_turn(self, word):
+    def player_turn(self,word):
         nword=word.lower()
-        return self.valid(self.word_checker(nword),nword)
+        return self.validate(word,self.word_checker(nword))
 
 
-    def valid(self,result,word):
+    def validate(self,word,result=True):
         if result: 
             self.current_word= word
             self.duplicated.append(word)
+            print(self.duplicated)
         return result
 
 
