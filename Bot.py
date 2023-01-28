@@ -6,102 +6,113 @@ from gifs import gifs
 app = Client("my_bot", api_id=28131444 ,api_hash="909be1635a5cb111622cda5ac2f7b5bc",bot_token="5936755342:AAFpb-_n3blnHW37qeuSOMdX4VL69Z_z480")
 # app.start
 
-############ Handlers ############
 def Main():
-    @app.on_message(filters.regex('^\/start$'))
+    @app.on_message(filters.command('start'))
     def handle_word(client, message):
-        client.send_message(chat_id=message.chat.id, text="Please wait...")
         Main_Keyboard(client,message.chat.id)
+        Handle_Main()
 
-    @app.on_message(filters.regex('^Start Game 🏁$'))
+### Handlers ########################################################################
+def Handle_Main():
+    @app.on_message(filters.regex('^Start Game 🏁$') | filters.regex('^Rules 📜$') | filters.regex('^About$'))
     def handle_action(client, message):
-        client.send_message(chat_id=message.chat.id, text="Cool let's play 😄")
-        Pre_Game()
-        Player_Decision_Keyboard(client,message.chat.id)
+        if message.text == 'Start Game 🏁':
+            client.send_message(chat_id=message.chat.id, text="Cool let's play 😄")
+            Pre_Game(client,message.chat.id)
 
-    @app.on_message(filters.regex('^Rules 📜$'))
+        elif message.text == 'Rules 📜':
+            client.send_message(chat_id=message.chat.id, text="""Rules are simple:
+            1. You can only use words that start with the last letter of the previous word.
+            2. You can't use the same word twice.
+            3. You can't use a word that is not in the dictionary.
+            4. Same as the third 😀.
+                """)
+
+        elif message.text == 'About':
+            client.send_message(chat_id=message.chat.id, text="""
+                I was made by @Y42id and @medbenzekri.
+                You can get in touch with them if you want to know more about me 😁
+                """)
+def Play_Again_Handler(client,message):
+    Play_Again_Keyboard(client,message.chat.id)
+    @app.on_message(filters.regex('^Play Again 🔄$') | filters.regex('No Thanks'))
     def handle_action(client, message):
-        client.send_message(chat_id=message.chat.id, text="""Rules are simple:
-    1. You can only use words that start with the last letter of the previous word.
-    2. You can't use the same word twice.
-    3. You can't use a word that is not in the dictionary.
-    4. Same as the third 😀.
-        """)
-
-    @app.on_message(filters.regex('^About$'))
-    def handle_action(client, message):
-        client.send_message(chat_id=message.chat.id, text="""
-        I was made by @Y42id and @medbenzekri.
-        You can get in touch with them if you want to know more about me 😁
-        """)
-
-############ Pre Game ############
-def Pre_Game():
-    @app.on_message(filters.regex('^Me 👦$'))
+        if message.text == 'Play Again 🔄':
+            Pre_Game(client,message.chat.id)
+        elif message.text == 'No Thanks':
+            client.send_message(chat_id=message.chat.id, text="Ok, see you later 😁")
+            Main_Keyboard(client,message.chat.id)
+            Handle_Main()
+### Pre Game ########################################################################
+def Pre_Game(client,chatid):
+    Turn_Decision_Keyboard(client,chatid)
+    @app.on_message(filters.regex('^Me 👦$') | filters.regex('^AI 🤖$'))
     def handle_action(client, message):
         user_id=message.chat.id
         user = Game.handle_user(user_id)
-        client.send_message(chat_id=message.chat.id, text="Ok, you start first")
-        Start_Game('HUMAN')
+        if message.text == 'Me 👦':
+            client.send_message(chat_id=message.chat.id, text="Ok, you start first")
+            Start_Game('HUMAN')
+        elif message.text == 'AI 🤖':
+            client.send_message(chat_id=message.chat.id, text="Ok, I start first")
+            Surrender_Keyboard(client,message.chat.id)
+            client.send_message(chat_id=message.chat.id, text="The first word is")
+            client.send_message(chat_id=message.chat.id, text=f"{user.Ai_Turn(True)}")
+            client.send_message(chat_id=message.chat.id, text="Your turn")
+            Start_Game()
 
-    @app.on_message(filters.regex('^AI 🤖$'))
-    def handle_action(client, message):
-        # load_words()
-        user_id=message.chat.id
-        
-        user = Game.handle_user(user_id)
-        client.send_message(chat_id=message.chat.id, text="Ok, I start first")
-        Surrender_Keyboard(client,message.chat.id)
-        client.send_message(chat_id=message.chat.id, text="The first word is")
-        client.send_message(chat_id=message.chat.id, text=f"{user.Ai_Turn(True)}")
-        client.send_message(chat_id=message.chat.id, text="Your turn")
-        Start_Game()
+############ Game #####################################################################
 
-############ Game ############
 def Start_Game(First_Player=any):
     @app.on_message(filters.regex('^[a-zA-Z]+$'))
     def handle_word(client, message):
         user_id=message.chat.id
         user = Game.handle_user(user_id)
+
         if First_Player=='HUMAN':
             user.Player_Turn(True,message.text.lower())
         else:
-            Send_Error(client,message.chat.id,user.Player_Turn(False,message.text.lower()))
-
-        client.send_message(chat_id=message.chat.id, text=f"{user.Ai_Turn(False,message.text.lower())}")
+            response=user.Player_Turn(False,message.text.lower())
+            Handle_Error(client,message,response,user)
 
     @app.on_message(filters.regex('Surrender 🏳️'))
     def handle_word(client, message):
         client.send_message(chat_id=message.chat.id, text="Well that's a win for me 💪😏")
         Main_Keyboard(client,message.chat.id)
 
-    @app.on_message(filters.regex('[^a-zA-Z]+'))
-    def handle_word(client, message):
-        client.send_message(chat_id=message.chat.id, text="Wow wait that's not allowed 😶")
+    # @app.on_message(filters.regex('[^a-zA-Z]+'))
+    # def handle_word(client, message):
+    #     client.send_message(chat_id=message.chat.id, text="Wow wait that's not allowed 😶")
 
-### Game Result
-def Send_Error(client,chatid,result):
-    if result=='Letter Fail':
-        client.send_message(chatid, text='Wrong word!')
-        client.send_message(chatid, text='You can only use words that start with the last letter of the previous word.')
-    elif result=='Duplicated':
-        client.send_message(chatid, text='Wrong word!')
-        client.send_message(chatid, text='You can\'t use the same word twice.')
-    elif result=='Unvalid':
-        client.send_message(chatid, text='You used an unvalid or misspelled word!')
-        client.send_message(chatid, text="It's okay keep playing...")
-    else: return
-    gif_file=random.choice(gifs)
-    client.send_animation(chatid, gif_file)
-    Play_Again_Keyboard(client,chatid)
-    Main_Keyboard(client,chatid)
-    Main()
+### Game Result ######################################################################
 
-### Keybaords
+def Handle_Error(client,message,result,user):
+    if result in ['Unvalid','Letter Fail','Duplicated']:
+        if result=='Unvalid':
+            client.send_message(message.chat.id, text='You used an unvalid or misspelled word!')
+            client.send_message(message.chat.id, text="You should read a dictionary!")
+
+        elif result=='Letter Fail':
+            client.send_message(message.chat.id, text='Wrong word!')
+            client.send_message(message.chat.id, text='You can only use words that start with the last letter of the previous word.')
+        
+        elif result=='Duplicated':
+            client.send_message(message.chat.id, text='Wrong word!')
+            client.send_message(message.chat.id, text='You can\'t use the same word twice.')
+        ### Sarcasm
+        gif_file=random.choice(gifs)
+        client.send_animation(message.chat.id, gif_file)
+        Play_Again_Handler(client,message)
+    
+    elif result=='Valid': 
+        client.send_message(message.chat.id, text=f"{user.Ai_Turn(False,message.text.lower())}")
+
+### Keybaords ########################################################################
+
 def Main_Keyboard(client,chatid):
     client.send_message(
             chat_id=chatid,
-            text="🌪 Weclome to Word Chain ⛓️",
+            text="⛓️ Word Chain ⛓️",
             reply_markup=ReplyKeyboardMarkup(
                 [
                     ['Start Game 🏁'],
@@ -111,7 +122,7 @@ def Main_Keyboard(client,chatid):
                 resize_keyboard=True  # Make the keyboard smaller
             )
         )
-def Player_Decision_Keyboard(client,chatid):
+def Turn_Decision_Keyboard(client,chatid):
     client.send_message(
             chat_id=chatid,
             text="But before that who do you think should start first? 🤔",
@@ -137,10 +148,10 @@ def Surrender_Keyboard(client,chatid):
 def Play_Again_Keyboard(client,chatid):
     client.send_message(
             chat_id=chatid,
-            text="",
+            text="Would you like to play again?",
             reply_markup=ReplyKeyboardMarkup(
                 [
-                    ['Play Again']
+                    ['Play Again 🔄','No Thanks']
                 ],
                 resize_keyboard=True  # Make the keyboard smaller
             )
