@@ -1,1 +1,1 @@
-# Telegram-Shell
+# Telegram bot for playing word chain game .
