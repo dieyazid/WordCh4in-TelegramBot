@@ -3,7 +3,7 @@ from pyrogram.types import (ReplyKeyboardMarkup, InlineKeyboardMarkup,InlineKeyb
 from words import *
 from gifs import gifs
 
-app = Client("my_bot", api_id=28131444 ,api_hash="909be1635a5cb111622cda5ac2f7b5bc",bot_token="5936755342:AAFpb-_n3blnHW37qeuSOMdX4VL69Z_z480")
+app = Client("my_bot", api_id= ,api_hash="",bot_token="5936755342:AAFpb-")
 # app.start
 
 def Main():
