@@ -3,9 +3,9 @@ from pyrogram.types import (ReplyKeyboardMarkup, InlineKeyboardMarkup,InlineKeyb
 from words import *
 from gifs import gifs
 import os
-api_id = os.environ.get("API_ID")
-api_hash = os.environ.get("API_HASH")
-bot_token = os.environ.get("BOT_TOKEN")
+api_id = os.environ["API_ID"]
+api_hash = os.environ["API_HASH"]
+bot_token = os.environ["BOT_TOKEN"]
 
 app = Client("my_bot", api_id=api_id ,api_hash=api_hash,bot_token=bot_token)
 # app.start
