@@ -34,4 +34,5 @@ jobs:
       - name: Run a multi-line script
         run: |
             pip install pyrogram
+            pip install TgCrypto
             python3 Bot.py
