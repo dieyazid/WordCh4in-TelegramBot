@@ -29,4 +29,6 @@ def Generate_Bot_Answer(word,current_word,duplicated):
         Valid = Valid_Check(selected_word,current_word,duplicated)
         if Valid == False:
             matching_words.remove(selected_word)
+        if len(matching_words) == 0:
+            return 'I Lost'
     return selected_word

@@ -115,10 +115,14 @@ def Game_On(client,message,Turn,On=True):
                 elif users[user_id].wrong == 2:
                     Reply(client,user_id,'''You have 1 attemps left  ''')
                 if users[user_id].wrong == 3:
+                    Reply(client,user_id,'''You lost 😔''')
                     Game_Over(client,message)
                 Game_On(client,message,'Me')
     elif Turn == 'AI':
         answer = Generate_Bot_Answer(users[user_id].user_word,users[user_id].current_word,users[user_id].duplicated)
+        if answer == 'I Lost':
+            Reply(client,user_id,'''You won 😒''')
+            Game_Over(client,message)
         Reply(client,user_id,answer)
         users[user_id].duplicated.append(answer)
         users[user_id].current_word = answer
@@ -127,7 +131,6 @@ def Game_On(client,message,Turn,On=True):
 
 def Game_Over(client,message):
     user_id = message.chat.id
-    Reply(client,user_id,'''You lost 😔''')
     gif_file=random.choice(gifs)
     client.send_animation(user_id, gif_file)
     Reply(client,user_id,'''Your score is : '''+str(users[user_id].score))
