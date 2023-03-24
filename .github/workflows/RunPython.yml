@@ -1,16 +1,10 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Run Python Script
 
 on:
-  # # Triggers the workflow on push or pull request events but only for the "main" branch
-  # push:
-  #   branches: [ "main" ]
-  # pull_request:
-  #   branches: [ "main" ]
-
-  # # Allows you to run this workflow manually from the Actions tab
-  
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 env:
@@ -33,5 +27,5 @@ jobs:
 
       - name: Run python script
         run: |
-            pip install -r requirements.txt
-            python3 Bot.py
+            pip install pyrogram
+            python3 main.py
