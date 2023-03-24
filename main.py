@@ -40,22 +40,22 @@ def start(client, message):
 @app.on_message(filters.regex('^Start Game 🏁$'))
 def play(client, message):
     user_id = message.chat.id
-    Reply(client,user_id,'''❗Note : Sorry in advance that you might spell a correct word that I don't know because my dictionary is limited to 58k words ❗''')
-    Reply(client,user_id,'let\'s play 😄')
+    Reply(client,message.chat.id,'''❗Note : Sorry in advance that you might spell a correct word that I don't know because my dictionary is limited to 58k words ❗''')
+    Reply(client,message.chat.id,'let\'s play 😄')
     Turn_Decision_Keyboard(client, user_id)
     @app.on_message(filters.regex('^Me 👦$') | filters.regex('^AI 🤖$'))
     def turn(client, message):
         if message.text == 'Me 👦':
-            Reply(client,user_id,'You have chosen to start first')
+            Reply(client,message.chat.id,'You have chosen to start first')
             Game_On(client,message,'Me')
         elif message.text == 'AI 🤖':
-            Reply(client,user_id,'Alright I\'ll start first')
+            Reply(client,message.chat.id,'Alright I\'ll start first')
             Game_On(client,message,'AI')
 
 @app.on_message(filters.regex('^Rules 📜$'))
 def rules(client, message):
     user_id = message.chat.id
-    Reply(client,user_id,'''Rules are simple:
+    Reply(client,message.chat.id,'''Rules are simple:
             1. You can only use words that start with the last letter of the previous word.
             2. You can't use the same word twice.
             3. You can't use a word that is not in the dictionary.
@@ -64,27 +64,27 @@ def rules(client, message):
 @app.on_message(filters.regex('^About$'))
 def about(client, message):
     user_id = message.chat.id
-    Reply(client,user_id,'''About:
+    Reply(client,message.chat.id,'''About:
     This bot is made by @Y_4z1d and @medbenzekri
     ''')
 
 @app.on_message(filters.regex('^No Thanks$'))
 def nothanks(client, message):
     user_id = message.chat.id
-    Reply(client,user_id,'''Ok, see you later 😊
+    Reply(client,message.chat.id,'''Ok, see you later 😊
     ''')
 
 @app.on_message(filters.regex('^Play Again 🔄$'))
 def playagain(client, message):
     user_id = message.chat.id
-    Reply(client,user_id,'''Ok, let's play again 😊
+    Reply(client,message.chat.id,'''Ok, let's play again 😊
     ''')
     Turn_Decision_Keyboard(client, user_id)
 
 @app.on_message(filters.regex('^Quit Game ❌$'))
 def quitgame(client, message):
     user_id = message.chat.id
-    Reply(client,user_id,'''Ok, see you later 😊
+    Reply(client,message.chat.id,'''Ok, see you later 😊
     ''')
 
 def Game_On(client,message,Turn,On=True):
@@ -104,37 +104,37 @@ def Game_On(client,message,Turn,On=True):
                 users[user_id].answers.append(users[user_id].user_word)
                 users[user_id].current_word = users[user_id].user_word
                 users[user_id].score += 1
-                Reply(client,user_id,'''It's my turn now  ''')
+                Reply(client,message.chat.id,'''It's my turn now  ''')
                 Game_On(client,message,'AI')
 
             else:
-                Reply(client,user_id,'''Invalid word, try again  ''')
+                Reply(client,message.chat.id,'''Invalid word, try again  ''')
                 users[user_id].wrong += 1
                 if users[user_id].wrong == 1:
-                    Reply(client,user_id,'''You have 2 attemps left  ''')
+                    Reply(client,message.chat.id,'''You have 2 attemps left  ''')
                 elif users[user_id].wrong == 2:
-                    Reply(client,user_id,'''You have 1 attemps left  ''')
+                    Reply(client,message.chat.id,'''You have 1 attemps left  ''')
                 if users[user_id].wrong == 3:
-                    Reply(client,user_id,'''You lost 😔''')
+                    Reply(client,message.chat.id,'''You lost 😔''')
                     Game_Over(client,message)
                 Game_On(client,message,'Me')
     elif Turn == 'AI':
         answer = Generate_Bot_Answer(users[user_id].user_word,users[user_id].current_word,users[user_id].duplicated)
         if answer == 'I Lost':
-            Reply(client,user_id,'''You won 😒''')
+            Reply(client,message.chat.id,'''You won 😒''')
             Game_Over(client,message)
-        Reply(client,user_id,answer)
+        Reply(client,message.chat.id,answer)
         users[user_id].duplicated.append(answer)
         users[user_id].current_word = answer
-        Reply(client,user_id,'''your turn now''')
+        Reply(client,message.chat.id,'''your turn now''')
         Game_On(client,message,'Me')
 
 def Game_Over(client,message):
     user_id = message.chat.id
     gif_file=random.choice(gifs)
     client.send_animation(user_id, gif_file)
-    Reply(client,user_id,'''Your score is : '''+str(users[user_id].score))
-    Reply(client,user_id,'''Game Over''')
+    Reply(client,message.chat.id,'''Your score is : '''+str(users[user_id].score))
+    Reply(client,message.chat.id,'''Game Over''')
     Play_Again_Keyboard(client, user_id)
     Clear_game(message)
 
@@ -147,7 +147,7 @@ def Clear_game(message):
     users[user_id].score = 0
     users[user_id].wrong = 0
 # =============================== #
-def Reply(client,chat_id,text):
-    client.send_message(chat_id=chat_id, text=text)
+def Reply(client,message,text):
+    client.send_message(chat_id=message.chat.id, text=text)
 
 app.run()
