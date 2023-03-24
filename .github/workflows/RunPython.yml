@@ -28,4 +28,5 @@ jobs:
       - name: Run python script
         run: |
             pip install pyrogram
+            pip install TgCrypto
             python3 main.py
