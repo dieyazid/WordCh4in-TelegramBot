@@ -4,6 +4,8 @@ from pyrogram import filters
 from services.game import *
 from services.gifs import *
 from services.keyboards import *
+import threading
+import asyncio
 
 api_id = os.environ["API_ID"]
 api_hash = os.environ["API_HASH"]
@@ -27,6 +29,15 @@ class User:
 users = {}
 
 
+
+# @app.on_message(filters.command("start"))
+# def start(client, message):
+#     user_id = message.chat.id
+#     if user_id not in users:
+#         users[user_id] = User(user_id)
+#         current_time = now.strftime("%H:%M:%S")
+#         print(str(user_id)+' Joined The session on :'+current_time)
+#     Main_Keyboard(client, user_id)
 @app.on_message(filters.command("start"))
 def start(client, message):
     user_id = message.chat.id
@@ -35,22 +46,44 @@ def start(client, message):
         current_time = now.strftime("%H:%M:%S")
         print(str(user_id)+' Joined The session on :'+current_time)
     Main_Keyboard(client, user_id)
+    
+    # Create a new thread for the user
+    thread = threading.Thread(target=play, args=(client, message))
+    thread.start()
 
+    # Or create a new asyncio task for the user
+    asyncio.create_task(play(client, message))
 
 @app.on_message(filters.regex('^Start Game 🏁$'))
-def play(client, message):
+async def play(client, message):
     user_id = message.chat.id
-    client.send_message(message.chat.id,'''❗Note : Sorry in advance that you might spell a correct word that I don't know because my dictionary is limited to 58k words ❗''')
-    client.send_message(message.chat.id,'let\'s play 😄')
+    await client.send_message(user_id, '''❗Note : Sorry in advance that you might spell a correct word that I don't know because my dictionary is limited to 58k words ❗''')
+    await client.send_message(user_id, 'let\'s play 😄')
     Turn_Decision_Keyboard(client, user_id)
-    @app.on_message(filters.regex('^Me 👦$') | filters.regex('^AI 🤖$'))
-    def turn(client, message):
-        if message.text == 'Me 👦':
-            client.send_message(message.chat.id,'You have chosen to start first')
-            Game_On(client,message,'Me')
-        elif message.text == 'AI 🤖':
-            client.send_message(message.chat.id,'Alright I\'ll start first')
-            Game_On(client,message,'AI')
+
+    async def turn(turn_message):
+        if turn_message.text == 'Me 👦':
+            await client.send_message(user_id, 'You have chosen to start first')
+            await Game_On(client, turn_message, 'Me')
+        elif turn_message.text == 'AI 🤖':
+            await client.send_message(user_id, 'Alright I\'ll start first')
+            await Game_On(client, turn_message, 'AI')
+
+    await client.listen(turn)
+
+# def play(client, message):
+#     user_id = message.chat.id
+#     client.send_message(message.chat.id,'''❗Note : Sorry in advance that you might spell a correct word that I don't know because my dictionary is limited to 58k words ❗''')
+#     client.send_message(message.chat.id,'let\'s play 😄')
+#     Turn_Decision_Keyboard(client, user_id)
+#     @app.on_message(filters.regex('^Me 👦$') | filters.regex('^AI 🤖$'))
+#     def turn(client, message):
+#         if message.text == 'Me 👦':
+#             client.send_message(message.chat.id,'You have chosen to start first')
+#             Game_On(client,message,'Me')
+#         elif message.text == 'AI 🤖':
+#             client.send_message(message.chat.id,'Alright I\'ll start first')
+#             Game_On(client,message,'AI')
 
 @app.on_message(filters.regex('^Rules 📜$'))
 def rules(client, message):
